@@ -1,6 +1,10 @@
 .npm-cache/
 .pip-cache/
 .pip-tmp/
+.python-write-probe/
+.omr-probe-*/
+data/projects/*/quxi_omr_*/
+data/projects/*/quxi_omr_test_*/
 
 backend/.venv/
 backend/.python/

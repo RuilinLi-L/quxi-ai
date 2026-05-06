@@ -12,6 +12,8 @@ samples/   演示样例与生成资产
 
 ## 本地启动
 
+Windows + Anaconda 的完整本地启动步骤见 [LOCAL_SETUP.md](LOCAL_SETUP.md)。
+
 后端：
 
 ```powershell
