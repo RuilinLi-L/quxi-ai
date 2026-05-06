@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>曲析 AI</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">♬</div>
+          <div>
+            <h1>曲析 AI</h1>
+            <p>拍谱识别、乐理结构化分析、课程作业级中文报告</p>
+          </div>
+        </div>
+        <div id="statusPill" class="status-pill">等待上传</div>
+      </header>
+
+      <div class="workspace">
+        <aside class="panel upload-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">工作台</h2>
+              <p class="panel-subtitle">上传钢琴谱图片或 PDF，跑通识谱到报告的完整闭环。</p>
+            </div>
+          </div>
+          <div class="upload-body">
+            <label class="dropzone">
+              <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp,image/bmp,image/tiff,application/pdf" />
+              <span class="drop-icon">⇧</span>
+              <strong>拖入或点击上传谱面</strong>
+              <span>建议使用清晰钢琴印刷谱。倾斜、反光、手写标注会被记录为识别风险。</span>
+            </label>
+            <div class="button-row">
+              <button id="fullDemoBtn" class="primary-button" disabled>一键生成报告</button>
+              <button id="refreshBtn" class="secondary-button" disabled>刷新</button>
+            </div>
+            <div class="button-row">
+              <button id="recognizeBtn" class="secondary-button" disabled>识谱</button>
+              <button id="analyzeBtn" class="secondary-button" disabled>分析</button>
+              <button id="reportBtn" class="secondary-button" disabled>报告</button>
+            </div>
+            <ul class="hint-list">
+              <li>第一版重点支持钢琴印刷谱，复杂手写谱会提示风险。</li>
+              <li>未安装真实 OMR 引擎时，识谱会明确失败；仅需演示固定谱时可设置 ALLOW_DEMO_OMR=1。</li>
+              <li>MIDI 用于试听核对，不作为完整谱面语义来源。</li>
+            </ul>
+            <p id="errorText" class="error"></p>
+            <div id="log" class="log"></div>
+            <div id="recentBlock" hidden>
+              <p class="panel-subtitle">最近项目</p>
+              <div id="recentList" class="log"></div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="main-grid">
+          <div id="stageGrid" class="stage-grid"></div>
+          <section id="emptyState" class="panel empty-state">
+            <div>
+              <h2>把纸上的钢琴谱变成一份可讲清楚的作品分析</h2>
+              <p>首版原型聚焦音乐学院课程作业：拍谱、识谱、试听、提取和声曲式线索，并生成可导出的中文分析报告。</p>
+            </div>
+          </section>
+
+          <section id="projectPanel" class="panel" hidden>
+            <div class="panel-header">
+              <div>
+                <h2 id="projectTitle" class="panel-title"></h2>
+                <p id="projectSubtitle" class="panel-subtitle"></p>
+              </div>
+              <div class="button-row">
+                <a id="musicxmlLink" class="icon-button" hidden>MusicXML</a>
+                <a id="pdfLink" class="primary-button" hidden target="_blank">PDF</a>
+              </div>
+            </div>
+            <div class="review-grid">
+              <div id="sourcePreview" class="score-source"></div>
+              <div class="musicxml-viewer">
+                <pre id="xmlPreview">等待 MusicXML 识别结果</pre>
+              </div>
+            </div>
+            <div class="player-row">
+              <div>
+                <strong>试听核对</strong>
+                <p id="recognitionMeta" class="panel-subtitle">待识别</p>
+              </div>
+              <audio id="audioPlayer" controls hidden></audio>
+              <button id="audioPlaceholder" class="secondary-button" disabled>等待 MIDI</button>
+            </div>
+            <div id="warningRow" class="player-row" hidden>
+              <div id="warnings" class="log"></div>
+            </div>
+            <div id="analysisStrip" class="analysis-strip" hidden></div>
+          </section>
+
+          <section id="reportPanel" class="panel" hidden>
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">分析报告</h2>
+                <p class="panel-subtitle">系统识别结果与 AI 推测内容已在正文中区分说明。</p>
+              </div>
+              <a id="reportPdfButton" class="primary-button" target="_blank">导出 PDF</a>
+            </div>
+            <article id="reportBody" class="report-body"></article>
+          </section>
+        </section>
+      </div>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

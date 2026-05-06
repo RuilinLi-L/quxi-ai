@@ -1,0 +1,14 @@
+.npm-cache/
+.pip-cache/
+.pip-tmp/
+
+backend/.venv/
+backend/.python/
+backend/__pycache__/
+backend/app/**/__pycache__/
+backend/data/
+
+frontend/.next/
+frontend/node_modules/
+
+*.pyc
