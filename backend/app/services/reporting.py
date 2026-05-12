@@ -17,6 +17,17 @@ from ..models import MusicAnalysis, Project, Report
 from ..storage import asset_url
 
 
+DEFAULT_OPENAI_MODEL = "gpt-4o-mini"
+
+
+class ReportGenerationResult:
+    def __init__(self, markdown: str, provider: str, model: str | None = None, provider_error: str | None = None):
+        self.markdown = markdown
+        self.provider = provider
+        self.model = model
+        self.provider_error = provider_error
+
+
 def markdown_to_html(markdown: str) -> str:
     lines = markdown.splitlines()
     html_lines: list[str] = []
@@ -100,17 +111,22 @@ def build_local_report(project: Project, analysis: MusicAnalysis) -> str:
 """
 
 
-async def generate_report(project: Project, analysis: MusicAnalysis) -> str:
+async def generate_report(project: Project, analysis: MusicAnalysis) -> ReportGenerationResult:
     api_key = os.getenv("OPENAI_API_KEY")
+    model = os.getenv("OPENAI_MODEL", DEFAULT_OPENAI_MODEL)
     if not api_key:
-        return build_local_report(project, analysis)
+        return ReportGenerationResult(
+            markdown=build_local_report(project, analysis),
+            provider="local",
+            provider_error="OPENAI_API_KEY is not set; used local report template.",
+        )
 
     try:
         from openai import AsyncOpenAI
 
         client = AsyncOpenAI(api_key=api_key)
         response = await client.chat.completions.create(
-            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+            model=model,
             messages=[
                 {
                     "role": "system",
@@ -123,18 +139,34 @@ async def generate_report(project: Project, analysis: MusicAnalysis) -> str:
             ],
             temperature=0.35,
         )
-        return response.choices[0].message.content or build_local_report(project, analysis)
-    except Exception:
-        return build_local_report(project, analysis)
+        markdown = response.choices[0].message.content
+        if markdown and markdown.strip():
+            return ReportGenerationResult(markdown=markdown.strip(), provider="openai", model=model)
+        return ReportGenerationResult(
+            markdown=build_local_report(project, analysis),
+            provider="local",
+            model=model,
+            provider_error="OpenAI returned an empty report; used local report template.",
+        )
+    except Exception as exc:
+        return ReportGenerationResult(
+            markdown=build_local_report(project, analysis),
+            provider="local",
+            model=model,
+            provider_error=f"OpenAI report generation failed: {exc}",
+        )
 
 
-def build_report_model(project_id: str, title: str, markdown: str) -> Report:
+def build_report_model(project_id: str, title: str, result: ReportGenerationResult) -> Report:
     return Report(
         title=title,
-        markdown=markdown,
-        html=markdown_to_html(markdown),
+        markdown=result.markdown,
+        html=markdown_to_html(result.markdown),
         pdf_url=asset_url(project_id, "report.pdf"),
         generated_at=datetime.now(timezone.utc),
+        provider=result.provider,
+        model=result.model,
+        provider_error=result.provider_error,
     )
 
 

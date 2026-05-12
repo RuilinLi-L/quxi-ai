@@ -374,6 +374,17 @@ export default function Home() {
                       导出 PDF
                     </a>
                   </div>
+                  <div className="report-source">
+                    <span
+                      className={`source-pill ${
+                        project.report.provider === "openai" ? "source-openai" : project.report.provider === "local" ? "source-local" : "source-unknown"
+                      }`}
+                    >
+                      {project.report.provider === "openai" ? "OpenAI API" : project.report.provider === "local" ? "本地模板" : "未记录来源"}
+                    </span>
+                    {project.report.model ? <span>模型：{project.report.model}</span> : null}
+                    {project.report.provider_error ? <span className="source-error">{project.report.provider_error}</span> : null}
+                  </div>
                   <article className="report-body" dangerouslySetInnerHTML={{ __html: project.report.html }} />
                 </section>
               ) : null}

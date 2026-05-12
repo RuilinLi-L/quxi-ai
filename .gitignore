@@ -3,6 +3,10 @@
 .pip-tmp/
 .python-write-probe/
 .omr-probe-*/
+.env
+.env.*
+!.env.example
+!*.env.example
 data/projects/*/quxi_omr_*/
 data/projects/*/quxi_omr_test_*/
 

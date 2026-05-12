@@ -8,6 +8,7 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
+from .config import load_local_env
 from .models import Project, ProjectStatus
 from .services.analysis import analyze_musicxml
 from .services.omr import recognize_score
@@ -23,6 +24,9 @@ from .storage import (
     store_upload,
     utcnow,
 )
+
+
+load_local_env()
 
 
 app = FastAPI(title="曲析 AI API", version="0.1.0")

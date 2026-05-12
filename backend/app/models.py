@@ -48,6 +48,9 @@ class Report(BaseModel):
     html: str
     pdf_url: str | None = None
     generated_at: datetime
+    provider: str = "unknown"
+    model: str | None = None
+    provider_error: str | None = None
 
 
 class Project(BaseModel):

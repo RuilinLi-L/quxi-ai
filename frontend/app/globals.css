@@ -391,6 +391,42 @@ audio {
   max-width: 980px;
 }
 
+.report-source {
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+  padding: 12px 24px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.source-pill {
+  border: 1px solid var(--line);
+  padding: 4px 9px;
+  color: var(--ink);
+  background: var(--surface);
+}
+
+.source-openai {
+  border-color: color-mix(in srgb, var(--ok) 62%, var(--line));
+  background: #eef4ed;
+}
+
+.source-local {
+  border-color: color-mix(in srgb, var(--warn) 62%, var(--line));
+  background: #fff7e9;
+}
+
+.source-unknown {
+  background: var(--paper-deep);
+}
+
+.source-error {
+  color: var(--bad);
+}
+
 .report-body h1,
 .report-body h2 {
   color: var(--sage-dark);

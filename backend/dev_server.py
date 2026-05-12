@@ -16,11 +16,31 @@ from urllib.parse import unquote, urlparse
 
 
 ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = ROOT.parent
 DATA = ROOT / "data" / "projects"
 STATIC = ROOT / "static"
 MAX_UPLOAD_SIZE = 20 * 1024 * 1024
 ALLOWED_SUFFIX = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff", ".pdf"}
 DEMO_OMR_ENV = "ALLOW_DEMO_OMR"
+ENV_FILES = (PROJECT_ROOT / ".env.local", PROJECT_ROOT / ".env", ROOT / ".env.local", ROOT / ".env")
+
+
+def load_local_env() -> None:
+    for path in ENV_FILES:
+        if not path.exists():
+            continue
+        for raw_line in path.read_text(encoding="utf-8").splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
+
+
+load_local_env()
 
 
 DEMO_MUSICXML = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -522,6 +542,11 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_error_json(400, "请先完成乐理分析。")
                 return
             markdown, openai_warning = generate_openai_report(project)
+            openai_model = os.getenv("OPENAI_MODEL", "gpt-4o-mini") if os.getenv("OPENAI_API_KEY") else None
+            report_provider = "openai" if openai_model and not openai_warning else "local"
+            provider_error = openai_warning
+            if not os.getenv("OPENAI_API_KEY"):
+                provider_error = "OPENAI_API_KEY is not set; used local report template."
             if openai_warning:
                 project.setdefault("recognition", {}).setdefault("warnings", []).append(openai_warning)
             project["status"] = "completed"
@@ -531,6 +556,9 @@ class Handler(BaseHTTPRequestHandler):
                 "html": html_from_markdown(markdown),
                 "pdf_url": asset_url(project_id, "report.pdf"),
                 "generated_at": now(),
+                "provider": report_provider,
+                "model": openai_model,
+                "provider_error": provider_error,
             }
             write_pdf(project_dir(project_id) / "report.pdf", project, markdown)
             self.send_json(save_project(project))

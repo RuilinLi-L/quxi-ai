@@ -40,6 +40,9 @@ export type Report = {
   html: string;
   pdf_url: string | null;
   generated_at: string;
+  provider?: "openai" | "local" | "unknown";
+  model?: string | null;
+  provider_error?: string | null;
 };
 
 export type Project = {
